@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# SCRIPT A12 - CST8152 - FALL 2021
+#
+# COMPILERS COURSE - SCRIPT
+
+COMPILER=Buffer.exe
+
+FILE1=A12A_Empty
+FILE2=A12B_Hello
+FILE3=A12C_Basic
+FILE4=A12D_Big
+
+# --------------------------------------------------
+# - Test Start (A12 - F21)
+# --------------------------------------------------
+
+# Basic Tests (A12 - F21)
+
+./$COMPILER 1 "$FILE1.sof" > "$FILE1.out" 2> "$FILE1.err"
+./$COMPILER 1 "$FILE2.sof" > "$FILE2.out" 2> "$FILE2.err"
+./$COMPILER 1 "$FILE3.sof" > "$FILE3.out" 2> "$FILE3.err"
+
+# Advanced Tests (A12 - F21)
+
+./$COMPILER 1 "$FILE4.sof" f 100 10 > "$FILE4.out" 2> "$FILE4-f-100-10.err"
+./$COMPILER 1 "$FILE4.sof" a 100 10 > "$FILE4.out" 2> "$FILE4-a-100-10.err"
+./$COMPILER 1 "$FILE4.sof" m 100 10 > "$FILE4.out" 2> "$FILE4-m-100-10.err"
+
+# --------------------------------------------------
+# - Test End (A12 - F21)
+# --------------------------------------------------

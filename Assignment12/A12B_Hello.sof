@@ -1,0 +1,10 @@
+@ SOFIA Example
+  The program is "lexically" correct
+  and should not generate any error @
+&MAIN {
+	DATA {
+	}
+	CODE {
+		WRITE("Hello world!");
+	}
+}

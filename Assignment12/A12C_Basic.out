@@ -1,0 +1,30 @@
+Reading file A12C_Basic.sof ....Please wait
+The input file A12C_Basic.sof has not been completely loaded.
+Current size of buffer: 200.
+Last character read from the input file is:   32
+Input file size: 307
+
+Printing buffer parameters:
+
+The capacity of the buffer is:  200
+The current size of the buffer is:  200
+The operational mode of the buffer is: f
+The increment factor of the buffer is:  100
+The first symbol in the buffer is:  @
+The value of the flags field is: 00
+
+Printing buffer contents:
+
+@
+SOFIA Example
+The program is lexically correct about the SOFIA city 
+
+@
+&MAIN {
+	DATA {
+		INT #FoundationYear;
+		FLOAT %Area, %HDI;
+		STRING $CountryName;
+	}
+	CODE {
+	    #FoundationYea
