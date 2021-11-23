@@ -1,0 +1,12 @@
+function int main {
+
+	byte bl = 0b00001111;
+	int il = 05623;
+	float 234.656f;
+	string sl = "This is a string";
+	string sl2 = "another string...";
+	char cl = 'r';
+	bool boolean = true;
+
+	return 0;
+}
