@@ -48,7 +48,7 @@ enum BUFFERMODES {
 #define BUFFER_DEFAULT_INCREMENT	100			/* default increment factor */
 
 /* You should add your own constant definitions here */
-#define SOFIA_MAX_SIZE				SHRT_MAX-1	/*maximum capacity*/
+#define SOFIA_MAX_SIZE				SHRT_MAX-1	/*maximum capacity*/ 
 
 /* Add your bit-masks constant definitions here - Defined for SOFIA */
 /* BITS                                7654.3210 */
