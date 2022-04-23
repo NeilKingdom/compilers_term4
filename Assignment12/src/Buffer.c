@@ -37,39 +37,47 @@
 *   mode = operational mode
 * Return value: bPointer (pointer to Buffer)
 * Algorithm: Allocation of memory according to inicial (default) values.
-* TO_DO: 
-*	- Adjust datatypes for your LANGUAGE.
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Check flags.
 **************************************************************/
-
-BufferPointer create(sofia_int size, sofia_int increment, sofia_int mode) {
+BufferPointer create(pheonix_int size, pheonix_int increment, pheonix_int mode) {
 	BufferPointer b;
-	/* TO_DO: Defensive programming */
-	if (size<0 || size>SOFIA_MAX_SIZE)
+
+	/* Do not use getSize() since pBuffer->size has not been initialized yet */
+	if (size < 0 || size > PHEONIX_MAX)
 		return NULL;
+
+	if(increment < 0)
+		return NULL;
+
+	if(mode != MODE_FIXED && mode != MODE_ADDIT && mode != MODE_MULTI)
+		return NULL;
+
 	if (!size) {
 		size = BUFFER_DEFAULT_SIZE;
 		increment = BUFFER_DEFAULT_INCREMENT;
 	}
+
 	if (!increment)
 		mode = MODE_FIXED;
+
 	b = (BufferPointer)calloc(1, sizeof(Buffer));
-	/* TO_DO: Defensive programming */
-	if (b == NULL)
-		return NULL;
-	b->content = (sofia_chr*)malloc(size);
-	/* TO_DO: Defensive programming */
-	if (!b->content) {
+	if (b == NULL) {
 		free(b);
 		return NULL;
 	}
+
+	b->content = (pheonix_char*)malloc(size);
+	if ((b->content) == NULL) {
+		free(b->content);
+		free(b);
+		return NULL;
+	}
+
 	b->mode = mode;
 	b->size = size;
 	b->increment = increment;
-	/* TO_DO: Initialize flags */
-	/* TO_DO: The created flag must be signalized as EMP */
+	b->flags = PHEONIX_DEF;
+	b->flags |= PHEONIX_EMP;
+
 	return b;
 }
 
@@ -82,51 +90,52 @@ BufferPointer create(sofia_int size, sofia_int increment, sofia_int mode) {
 *   ch = char to be added
 * Return value:
 *	bPointer (pointer to Buffer)
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
+BufferPointer addChar(BufferPointer pBuffer, pheonix_char ch) {
+	pheonix_char* tempbuf;
+	pheonix_int newSize;
 
-BufferPointer addChar(BufferPointer const pBuffer, sofia_chr ch) {
-	sofia_chr* tempbuf;
-	sofia_int newSize;
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Reset Realocation */
-    /* TO_DO: Check FUL */
-	if (pBuffer->size == pBuffer->position.writePos * (sofia_int)sizeof(sofia_chr)) {
+	if (isFull(pBuffer)) {
+		pBuffer->flags |= PHEONIX_FUL;
 		switch (pBuffer->mode) {
 		case MODE_FIXED:
-			/* TO_DO: Set FUL */
+			pBuffer->flags |= PHEONIX_FUL;
+			/* Cannot allocate more memory in fixed mode so end function */
 			return NULL;
 		case MODE_ADDIT:
-			newSize = pBuffer->size + pBuffer->increment;
-			/* TO_DO: Defensive programming */
-			if (newSize < 0 || newSize <= pBuffer->size) {
+			if(getSize(pBuffer) == BUFFER_ERROR)
 				return NULL;
-			}
+			newSize = pBuffer->size + pBuffer->increment;
+			if(newSize < 0 || newSize <= pBuffer->size) 
+				return NULL;
 			break;
 		case MODE_MULTI:
-			newSize = pBuffer->size * pBuffer->increment;
-			/* TO_DO: Defensive programming */
-			if (newSize < 0 || newSize <= pBuffer->size) {
+			if(getSize(pBuffer) == BUFFER_ERROR)
 				return NULL;
-			}
+			newSize = pBuffer->size * pBuffer->increment;
+			if(newSize < 0 || newSize <= pBuffer->size) 
+				return NULL;
 			break;
 		default:
 			return NULL;
 		}
-		tempbuf = (sofia_chr*)realloc(pBuffer->content, newSize);
-		/* TO_DO: Defensive programming */
+
+		tempbuf = (pheonix_char*)realloc(pBuffer->content, newSize);
+		if(tempbuf == NULL) {
+			free(tempbuf);
+			return NULL;
+		}
+
 		if (tempbuf && tempbuf != pBuffer->content) {
-			/* TO_DO: Set Relocation */
+			pBuffer->flags |= PHEONIX_REL;
 			pBuffer->content = tempbuf;
 		}
 		pBuffer->size = newSize;
 	}
-	/* TO_DO: Adjust flags: Reset EMP */
-	/* TO_DO: Adjust flags: Set FUL if necessary */
+
+	pBuffer->flags &= PHEONIX_RESET_EMP;
 	pBuffer->content[pBuffer->position.writePos++] = ch;
+
 	return pBuffer;
 }
 
@@ -137,16 +146,19 @@ BufferPointer addChar(BufferPointer const pBuffer, sofia_chr ch) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_bol clear(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_bool clear(BufferPointer pBuffer) {
 	pBuffer->position.writePos = pBuffer->position.markPos = pBuffer->position.readPos = 0;
-	/* TO_DO: Adjust flags original */
-	return SOFIA_TRUE;
+	
+	if(pBuffer == NULL)
+		return PHEONIX_FALSE;
+
+	if(pBuffer->position.writePos || pBuffer->position.markPos || pBuffer->position.readPos) {
+		return PHEONIX_FALSE;
+	}
+
+	pBuffer->flags &= PHEONIX_DEF;
+	return PHEONIX_TRUE;
 }
 
 /************************************************************
@@ -156,15 +168,15 @@ sofia_bol clear(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_bol destroy(BufferPointer const pBuffer) {
-	free(pBuffer->content);
+pheonix_bool destroy(BufferPointer pBuffer) {
+
+	/* If content isn't empty free it */
+	if(pBuffer->content)
+		free(pBuffer->content);
+
 	free(pBuffer);
-	return SOFIA_TRUE;
+	return PHEONIX_TRUE;
 }
 
 /************************************************************
@@ -174,17 +186,18 @@ sofia_bol destroy(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_bol isFull(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Use bitwise check to test if buffer is FUL */
-	if (pBuffer->size == pBuffer->position.writePos * (sofia_int)sizeof(sofia_chr))
-		return SOFIA_TRUE;
-	return SOFIA_FALSE;
+pheonix_bool isFull(BufferPointer pBuffer) {
+	if(pBuffer == NULL) 
+		return PHEONIX_TRUE;
+
+	if((pBuffer->flags & PHEONIX_FUL) == PHEONIX_FUL) 
+		return PHEONIX_TRUE;
+
+	if (pBuffer->position.writePos * (pheonix_int)sizeof(pheonix_char) >= pBuffer->size) 
+		return PHEONIX_TRUE;
+
+	return PHEONIX_FALSE;
 }
 
 /************************************************************
@@ -194,13 +207,17 @@ sofia_bol isFull(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	addcPosition value
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_int getWritePos(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_int getWritePos(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return BUFFER_ERROR;
+
+	if(pBuffer->position.writePos < 0 || pBuffer->position.writePos > pBuffer->size)
+		return BUFFER_ERROR;
+
+	if(pBuffer->position.writePos > PHEONIX_MAX)
+		return BUFFER_ERROR;
+
 	return pBuffer->position.writePos;
 }
 
@@ -211,13 +228,17 @@ sofia_int getWritePos(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Size of buffer.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_int getSize(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_int getSize(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return BUFFER_ERROR;
+
+	if(!pBuffer->size)
+		return BUFFER_ERROR;
+
+	if(pBuffer->size < 0 || pBuffer->size > PHEONIX_MAX)
+		return BUFFER_ERROR;
+	
 	return pBuffer->size;
 }
 
@@ -228,13 +249,17 @@ sofia_int getSize(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	operational mode.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_int getMode(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_int getMode(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return BUFFER_ERROR;
+
+	if(!pBuffer->mode)
+		return BUFFER_ERROR;
+
+	if(pBuffer->mode != MODE_FIXED && pBuffer->mode != MODE_ADDIT && pBuffer->mode != MODE_MULTI)
+		return BUFFER_ERROR;
+	
 	return pBuffer->mode;
 }
 
@@ -246,13 +271,14 @@ sofia_int getMode(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	mark offset.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_int getMarkPos(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_int getMarkPos(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return BUFFER_ERROR;
+
+	if(pBuffer->position.markPos < 0 || pBuffer->position.markPos > pBuffer->size)
+		return BUFFER_ERROR;
+	
 	return pBuffer->position.markPos;
 }
 
@@ -265,15 +291,16 @@ sofia_int getMarkPos(BufferPointer const pBuffer) {
 *   mark = mark position for char
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_bol setMark(BufferPointer const pBuffer, sofia_int mark) {
-	/* TO_DO: Defensive programming */
+pheonix_bool setMark(BufferPointer pBuffer, pheonix_int mark) {
+	if(pBuffer == NULL)
+		return PHEONIX_FALSE;
+
+	if(mark < 0 || mark > pBuffer->size)
+		return PHEONIX_FALSE;
+	
 	pBuffer->position.markPos = mark;
-	return SOFIA_TRUE;
+	return PHEONIX_TRUE;
 }
 
 /************************************************************
@@ -283,18 +310,19 @@ sofia_bol setMark(BufferPointer const pBuffer, sofia_int mark) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Number of chars printed.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_int print(BufferPointer const pBuffer) {
-	sofia_int cont = 0;
-	sofia_chr c;
-	/* TO_DO: Defensive programming */
+pheonix_int print(BufferPointer pBuffer) {
+	pheonix_int cont = 0;
+	pheonix_char c;
+
+	if(pBuffer == NULL)
+		return BUFFER_ERROR;	
+
 	c = getChar(pBuffer);
-	/* TO_DO: Check flag if buffer EOB has achieved */
 	while (!(pBuffer->position.readPos == pBuffer->position.writePos)) {
+		/* getChar checks for EOB and sets flag if reached */
+		if((pBuffer->flags & PHEONIX_EOB) == PHEONIX_EOB)
+			return cont;
 		cont++;
 		printf("%c", c);
 		c = getChar(pBuffer);
@@ -311,22 +339,21 @@ sofia_int print(BufferPointer const pBuffer) {
 *   fi = pointer to file descriptor
 * Return value:
 *	Number of chars read and put in buffer.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_int load(BufferPointer const pBuffer, FILE* const fi) {
-	sofia_int size = 0;
-	sofia_chr c;
-	/* TO_DO: Defensive programming */
-	c = (sofia_chr)fgetc(fi);
+pheonix_int load(BufferPointer pBuffer, FILE* fi) {
+	pheonix_int size = 0;
+	pheonix_char c;
+
+	if(pBuffer == NULL)
+		return BUFFER_ERROR;
+
+	c = (pheonix_char)fgetc(fi);
 	while (!feof(fi)) {
 		if (!addChar(pBuffer, c)) {
 			ungetc(c, fi);
 			return BUFFER_ERROR;
 		}
-		c = (char)fgetc(fi);
+		c = (pheonix_char)fgetc(fi);
 		size++;
 	}
 	if (ferror(fi))
@@ -341,17 +368,18 @@ sofia_int load(BufferPointer const pBuffer, FILE* const fi) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_bol isEmpty(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Use bitwise operation to test if buffer is EMP */
-	if (pBuffer->position.writePos==0)
-		return SOFIA_TRUE;
-	return SOFIA_FALSE;
+pheonix_bool isEmpty(BufferPointer pBuffer) {
+	if(pBuffer == NULL)	
+		return PHEONIX_TRUE;
+
+	if((pBuffer->flags & PHEONIX_EMP) == PHEONIX_EMP)
+		return PHEONIX_TRUE;
+
+	if (pBuffer->position.writePos == 0) 
+		return PHEONIX_TRUE;
+
+	return PHEONIX_FALSE;
 }
 
 /************************************************************
@@ -361,18 +389,17 @@ sofia_bol isEmpty(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Char in the getC position.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_chr getChar(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
-	if (pBuffer->position.readPos == pBuffer->position.writePos) {
-		/* TO_DO: Set EOB flag */
+pheonix_char getChar(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return BUFFER_EOF;
+
+	if(pBuffer->size == pBuffer->position.writePos * (pheonix_int)sizeof(pheonix_char)) {
+		pBuffer->flags |= PHEONIX_EOB;
 		return BUFFER_EOF;
 	}
-	/* TO_DO: Reset EOB flag */
+
+	pBuffer->flags &= PHEONIX_RESET_EOB;
 	return pBuffer->content[pBuffer->position.readPos++];
 }
 
@@ -384,16 +411,15 @@ sofia_chr getChar(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_bol recover(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_bool recover(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return PHEONIX_FALSE;
+
 	pBuffer->position.readPos = 0;
 	pBuffer->position.markPos = 0;
-	return SOFIA_TRUE;
+
+	return PHEONIX_TRUE;
 }
 
 
@@ -404,15 +430,19 @@ sofia_bol recover(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_bol retract(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_bool retract(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return PHEONIX_FALSE;
+
+	if(!pBuffer->position.readPos)
+		return PHEONIX_FALSE;
+
+	if(pBuffer->position.readPos <= 0)
+		return PHEONIX_FALSE;
+
 	pBuffer->position.readPos--;
-	return SOFIA_TRUE;
+	return PHEONIX_TRUE;
 }
 
 
@@ -423,15 +453,13 @@ sofia_bol retract(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_bol restore(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_bool restore(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return PHEONIX_FALSE;
+
 	pBuffer->position.readPos = pBuffer->position.markPos;
-	return SOFIA_TRUE;
+	return PHEONIX_TRUE;
 }
 
 
@@ -442,13 +470,11 @@ sofia_bol restore(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	The readPos offset.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_int getReadPos(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_int getReadPos(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return BUFFER_ERROR;
+
 	return pBuffer->position.readPos;
 }
 
@@ -460,13 +486,11 @@ sofia_int getReadPos(BufferPointer const pBuffer) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	The Buffer increment.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_int getIncrement(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_int getIncrement(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return BUFFER_ERROR;
+
 	return pBuffer->increment;
 }
 
@@ -479,13 +503,14 @@ sofia_int getIncrement(BufferPointer const pBuffer) {
 *   pos = position to get the pointer
 * Return value:
 *	Position of string char.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_chr* getContent(BufferPointer const pBuffer, sofia_int pos) {
-	/* TO_DO: Defensive programming */
+pheonix_char* getContent(BufferPointer pBuffer, pheonix_int pos) {
+	if(pBuffer == NULL)
+		return NULL;
+
+	if(pos < 0 || pos >= pBuffer->size)
+		return NULL;
+
 	return pBuffer->content + pos;
 }
 
@@ -497,12 +522,13 @@ sofia_chr* getContent(BufferPointer const pBuffer, sofia_int pos) {
 *   pBuffer = pointer to Buffer Entity
 * Return value:
 *	Flags from Buffer.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 **************************************************************/
-sofia_flg getFlags(BufferPointer const pBuffer) {
-	/* TO_DO: Defensive programming */
+pheonix_byte getFlags(BufferPointer pBuffer) {
+	if(pBuffer == NULL)
+		return PHEONIX_DEF;
+
+	if(!pBuffer->flags)
+		return PHEONIX_DEF;
+
 	return pBuffer->flags;
 }
