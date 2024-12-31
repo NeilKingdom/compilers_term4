@@ -11,26 +11,47 @@
 * Purpose: This file is the main header for Parser (.h)
 *************************************************************/
 
+
 #ifndef COMPILERS_H_
-#include "Compilers.h"
+#include "compilers.h"
 #endif
 
 #ifndef BUFFER_H_
 #define BUFFER_H_
+
+/*#pragma warning(1:4001) *//*to enforce C89 type comments  - to make //comments an warning */
+
+/*#pragma warning(error:4001)*//* to enforce C89 comments - to make // comments an error */
 
 /* standard header files */
 #include <stdio.h>  /* standard input/output */
 #include <malloc.h> /* for dynamic memory allocation*/
 #include <limits.h> /* implementation-defined data type ranges and limits */
 
+/* CONSTANTS DEFINITION: GENERAL (NOT LANGUAGE DEPENDENT) .................................. */
+
+/* Modes (used to create buffer) */
+enum BUFFERMODES {
+	MODE_FIXED = 'f',
+	MODE_ADDIT = 'a',
+	MODE_MULTI = 'm'
+};
+
+/* TO_DO: Adjust all ants to your Language */
+
 #define BUFFER_ERROR (-1)						/* General error message */
 #define BUFFER_EOF '\0'							/* General EOF */
 
-#define BUFFER_DEFAULT_SIZE 200           /* default initial buffer capacity */
-#define BUFFER_DEFAULT_INCREMENT	100      /* default increment factor */
-#define PHEONIX_MAX (SHRT_MAX-1)	         /* maximum capacity */ 
+/* CONSTANTS DEFINITION: PREFIXED BY LANGUAGE NAME (SOFIA) .................................. */
 
-/* Pheonix Byte Flags */
+#define BUFFER_DEFAULT_SIZE 200 /* default initial buffer capacity */
+#define BUFFER_DEFAULT_INCREMENT	100 /* default increment factor */
+
+/* You should add your own ant definitions here */
+#define PHEONIX_MAX (SHRT_MAX-1)	/*maximum capacity*/
+
+/* Add your bit-masks ant definitions here - Defined for SOFIA */
+/* BITS                                7654.3210 */
 #define PHEONIX_DEF 0xF0 /* Default */
 #define PHEONIX_EMP 0x01 /* Empty */
 #define PHEONIX_FUL 0x02 /* Full */
@@ -41,12 +62,9 @@
 #define PHEONIX_RESET_EOB 0xFB
 #define PHEONIX_RESET_REL 0xF7
 
-/* Modes (used to create buffer) */
-enum BUFFERMODES {
-	MODE_FIXED = 'f',
-	MODE_ADDIT = 'a',
-	MODE_MULTI = 'm'
-};
+/* STRUCTURES DEFINITION: SUFIXED BY LANGUAGE NAME (SOFIA) .................................. */
+
+/* TO_DO: Adjust datatypes */
 
 /* Offset declaration */
 typedef struct position {
@@ -65,8 +83,7 @@ typedef struct buffer {
 	Position	position;		   /* Offset / position field */
 } Buffer, * BufferPointer;
 
-/* ---- Function Prototypes ---- */
-
+/* FUNCTIONS DECLARATION:  .................................. */
 /* General Operations */
 BufferPointer create(pheonix_int, pheonix_int, pheonix_int);
 BufferPointer addChar(BufferPointer, pheonix_char);
@@ -81,7 +98,6 @@ pheonix_bool isFull(BufferPointer);
 pheonix_bool isRealocated(BufferPointer);
 pheonix_int print(BufferPointer);
 pheonix_int load(BufferPointer, FILE*);
-
 /* Getters */
 pheonix_int getSize(BufferPointer);
 pheonix_int getWritePos(BufferPointer);

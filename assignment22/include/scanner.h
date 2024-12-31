@@ -13,7 +13,7 @@
 *************************************************************/
 
 #ifndef COMPILERS_H_
-#include "Compilers.h"
+#include "compilers.h"
 #endif
 
 #ifndef SCANNER_H_
@@ -38,7 +38,7 @@
 /* TO_DO: Define Token codes - Create your token classes */
 enum TOKENS {
    ERR_T,	   /* Error token */
-   VID_T,	   /* General variable identifier */ 
+   VID_T,	   /* General variable identifier */
 	LVID_T,     /* Local variable identifier */
    INL_T,	   /* Integer literal token */
    FPL_T,	   /* Floating point literal token */
@@ -108,8 +108,8 @@ typedef struct Token {
 #define CHARSEOF255 (0xFF)
 
 /*	Special case tokens processed separately one by one in the token-driven part of the scanner
- *	'=' , ' ' , '(' , ')' , '{' , '}' , == , <> , '>' , '<' , ';', 
- *	white space, @comment@ , ',' , ';' , '-' , '+' , '*' , '/', ## , 
+ *	'=' , ' ' , '(' , ')' , '{' , '}' , == , <> , '>' , '<' , ';',
+ *	white space, @comment@ , ',' , ';' , '-' , '+' , '*' , '/', ## ,
  *	.&., .|. , .!. , SEOF.
  */
 
@@ -173,8 +173,8 @@ extern pheonix_int stateType[];
 extern PTR_ACCFUN finalStateTable[];
 extern pheonix_char* keywordTable[KWT_SIZE];
 
-/* 
- * Accepting function (action) callback table (array) definition 
+/*
+ * Accepting function (action) callback table (array) definition
  * If you do not want to use the typedef, the equvalent declaration is:
  */
 

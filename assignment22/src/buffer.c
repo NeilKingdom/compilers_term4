@@ -17,11 +17,11 @@
 *************************************************************/
 
 #ifndef COMPILERS_H_
-#include "../deps/Compilers.h"
+#include "../deps/compilers.h"
 #endif
 
 #ifndef BUFFER_H_
-#include "../deps/Buffer.h"
+#include "../deps/buffer.h"
 #endif
 
 /************************************************************
@@ -37,7 +37,7 @@
 *   mode = operational mode
 * Return value: bPointer (pointer to Buffer)
 * Algorithm: Allocation of memory according to inicial (default) values.
-* TO_DO: 
+* TO_DO:
 *	- Adjust datatypes for your LANGUAGE.
 *   - Use defensive programming
 *	- Check boundary conditions
@@ -121,7 +121,7 @@ BufferPointer addChar(BufferPointer pBuffer, pheonix_char ch) {
 
 			newSize = pBuffer->size + pBuffer->increment;
 			/* TO_DO: Defensive programming */
-			if(newSize < 0 || newSize <= pBuffer->size) 
+			if(newSize < 0 || newSize <= pBuffer->size)
 				return NULL;
 			break;
 		case MODE_MULTI:
@@ -130,7 +130,7 @@ BufferPointer addChar(BufferPointer pBuffer, pheonix_char ch) {
 
 			newSize = pBuffer->size * pBuffer->increment;
 			/* TO_DO: Defensive programming */
-			if(newSize < 0 || newSize <= pBuffer->size) 
+			if(newSize < 0 || newSize <= pBuffer->size)
 				return NULL;
 			break;
 		default:
@@ -172,7 +172,7 @@ BufferPointer addChar(BufferPointer pBuffer, pheonix_char ch) {
 pheonix_bool clear(BufferPointer pBuffer) {
 	/* TO_DO: Defensive programming */
 	pBuffer->position.writePos = pBuffer->position.markPos = pBuffer->position.readPos = 0;
-	
+
 	if(pBuffer == NULL)
 		return PHEONIX_FALSE;
 
@@ -222,13 +222,13 @@ pheonix_bool destroy(BufferPointer pBuffer) {
 pheonix_bool isFull(BufferPointer pBuffer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Use bitwise check to test if buffer is FUL */
-	if(pBuffer == NULL) 
+	if(pBuffer == NULL)
 		return PHEONIX_TRUE;
 
-	if((pBuffer->flags & PHEONIX_FUL) == PHEONIX_FUL) 
+	if((pBuffer->flags & PHEONIX_FUL) == PHEONIX_FUL)
 		return PHEONIX_TRUE;
 
-	if (pBuffer->position.writePos * (pheonix_int)sizeof(pheonix_char) >= pBuffer->size) 
+	if (pBuffer->position.writePos * (pheonix_int)sizeof(pheonix_char) >= pBuffer->size)
 		return PHEONIX_TRUE;
 
 	return PHEONIX_FALSE;
@@ -282,7 +282,7 @@ pheonix_int getSize(BufferPointer pBuffer) {
 
 	if(pBuffer->size < 0 || pBuffer->size > PHEONIX_MAX)
 		return BUFFER_ERROR;
-	
+
 	return pBuffer->size;
 }
 
@@ -308,7 +308,7 @@ pheonix_int getMode(BufferPointer pBuffer) {
 
 	if(pBuffer->mode != MODE_FIXED && pBuffer->mode != MODE_ADDIT && pBuffer->mode != MODE_MULTI)
 		return BUFFER_ERROR;
-	
+
 	return pBuffer->mode;
 }
 
@@ -332,7 +332,7 @@ pheonix_int getMarkPos(BufferPointer pBuffer) {
 
 	if(pBuffer->position.markPos < 0 || pBuffer->position.markPos > pBuffer->size)
 		return BUFFER_ERROR;
-	
+
 	return pBuffer->position.markPos;
 }
 
@@ -357,7 +357,7 @@ pheonix_bool setMark(BufferPointer pBuffer, pheonix_int mark) {
 
 	if(mark < 0 || mark > pBuffer->size)
 		return PHEONIX_FALSE;
-	
+
 	pBuffer->position.markPos = mark;
 	return PHEONIX_TRUE;
 }
@@ -379,7 +379,7 @@ pheonix_int print(BufferPointer pBuffer) {
 	pheonix_char c;
 	/* TO_DO: Defensive programming */
 	if(pBuffer == NULL)
-		return BUFFER_ERROR;	
+		return BUFFER_ERROR;
 
 	c = getChar(pBuffer);
 	/* TO_DO: Check flag if buffer EOB has achieved */
@@ -444,13 +444,13 @@ pheonix_int load(BufferPointer pBuffer, FILE* fi) {
 pheonix_bool isEmpty(BufferPointer pBuffer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Use bitwise operation to test if buffer is EMP */
-	if(pBuffer == NULL)	
+	if(pBuffer == NULL)
 		return PHEONIX_TRUE;
 
 	if((pBuffer->flags & PHEONIX_EMP) == PHEONIX_EMP)
 		return PHEONIX_TRUE;
 
-	if (pBuffer->position.writePos==0) 
+	if (pBuffer->position.writePos==0)
 		return PHEONIX_TRUE;
 
 	return PHEONIX_FALSE;

@@ -81,7 +81,7 @@ pheonix_int transitionTable[][TABLE_COLUMNS] = {
 
 pheonix_int stateType[] = {
 	  NOAS, /* 00 NOAS */
-     NOAS, /* 01 NOAS */ 
+     NOAS, /* 01 NOAS */
      ASWR, /* 02 ASWR (FPL) */
      ASWR, /* 03 ASWR (FPL) */
      ASWR, /* 04 ASWR (IL) */
@@ -94,13 +94,13 @@ pheonix_int stateType[] = {
      ASWR, /* 11 ASWR (CL) */
      NOAS, /* 12 NOAS */
      ASNR, /* 13 ASNR (SL) */
-     NOAS, /* 14 NOAS */      
+     NOAS, /* 14 NOAS */
      ASWR, /* 15 ASWR (LVID) */
      ASWR, /* 16 ASWR (KEY) */
      ASWR, /* 17 ASWR (VID) */
      ASNR, /* 18 ASWR (ES) */
      ASWR  /* 19 ASWR (ER) */
-};            
+};
 
 PTR_ACCFUN finalStateTable[] = {
     NULL,    /*00 */
@@ -187,7 +187,7 @@ pheonix_int startScanner(BufferPointer psc_buf) {
  *		Main function of buffer, responsible to classify a char (or sequence
  *		of chars). In the first part, a specific sequence is detected (reading
  *		from buffer). In the second part, a pattern (defined by Regular Expression)
- *		is recognized and the appropriate function is called (related to final states 
+ *		is recognized and the appropriate function is called (related to final states
  *		in the Transition Diagram).
  ************************************************************/
 Token tokenizer(void) {
@@ -356,7 +356,7 @@ Token tokenizer(void) {
 				return currentToken;
 
 		/* ------- Other -------- */
-		
+
 		/* Comments */
 		case '#':
 			newc = getChar(sourceBuffer);
@@ -369,7 +369,7 @@ Token tokenizer(void) {
 					line++;
 				}
 			} while (c != ';' && c != CHARSEOF0 && c != CHARSEOF255);
-			break;		
+			break;
 		/* Cases for END OF FILE */
 		case CHARSEOF0:
 			currentToken.code = SEOF_T;
@@ -387,7 +387,7 @@ Token tokenizer(void) {
 		*/
 
 		/* TO_DO_16: Adjust / check the logic for your language */
-		default: 
+		default:
 			/* !Important to retrieve state 0! */
 			state = nextState(state, c);
 
@@ -425,7 +425,7 @@ Token tokenizer(void) {
 			}
 			/* Set read pos back to markPos */
 			restore(sourceBuffer);
-			
+
 			/*printf("Source Contents from readPos\n");
 			for(i = 0; i < lexLength; i++) {
 				printf("%c", getChar(sourceBuffer));
@@ -440,9 +440,9 @@ Token tokenizer(void) {
 
 			destroy(lexemeBuffer);
 			return currentToken;
-		} 
-	} 
-} 
+		}
+	}
+}
 
 
 /*************************************************************
@@ -484,7 +484,7 @@ pheonix_int nextClass(pheonix_char c) {
 	/* Adjust the logic to return next column in TT */
 	/*	{0,1}(0), [2-9](1), [A-Z](2), [a-z](3), '(4), "(5), $(6), .(7), EOS(8), EOF(9), Other(10) */
 	pheonix_int asciiVal = (int)(c - '0');
-		
+
 	switch (c) {
 		case CHRCOL4:
 			val = 4;
@@ -508,11 +508,11 @@ pheonix_int nextClass(pheonix_char c) {
 		default:
 			/* Lower-case */
 			if (isalpha(c) && islower(c)) {
-				val = 3;	
+				val = 3;
 			}
 			/* Upper-case */
 			else if (isalpha(c) && isupper(c)) {
-				val = 2;	
+				val = 2;
 			}
 			/* Binary digit */
 			else if(isdigit(c) && asciiVal < 2) {
@@ -521,10 +521,10 @@ pheonix_int nextClass(pheonix_char c) {
 			/* 2 - 9 digit */
 			else if(isdigit(c)) {
 				val = 1;
-			} 
+			}
 			/* Other */
 			else {
-				val = 10;	
+				val = 10;
 			}
 	}
 	return val;
@@ -533,9 +533,9 @@ pheonix_int nextClass(pheonix_char c) {
 /*************************************************************
  * Acceptance State Function VID
  *		In this function, the pattern for IVID must be recognized.
- *		Since keywords obey the same pattern, is required to test if 
+ *		Since keywords obey the same pattern, is required to test if
  *		the current lexeme matches with KW from language.
- *	- Remember to respect the limit defined for lexemes (VID_LEN) and 
+ *	- Remember to respect the limit defined for lexemes (VID_LEN) and
  *	  set the lexeme to the corresponding attribute (vidLexeme).
  *    Remember to end each token with the \0.
  *  - Suggestion: Use "strncpy" function.
@@ -545,7 +545,7 @@ pheonix_int nextClass(pheonix_char c) {
  /* TO_DO_19A: Adjust the function for VID */
 Token funcVID(pheonix_char lexeme[]) {
 	Token currentToken = { 0 };
-	
+
 	/* Can't have digit as first character in VID lexeme */
 	if(isdigit(lexeme[0]))
 		currentToken.code = ERR_T;
@@ -553,16 +553,16 @@ Token funcVID(pheonix_char lexeme[]) {
 		currentToken.code = VID_T;
 
 	strncpy(currentToken.attribute.idLexeme, lexeme, VID_LEN);
-	currentToken.attribute.idLexeme[VID_LEN] = CHARSEOF0; 
+	currentToken.attribute.idLexeme[VID_LEN] = CHARSEOF0;
 	return currentToken;
 }
 
 /*************************************************************
  * Acceptance State Function LVID
  *		In this function, the pattern for LVID must be recognized.
- *		Since keywords obey the same pattern, is required to test if 
+ *		Since keywords obey the same pattern, is required to test if
  *		the current lexeme matches with KW from language.
- *	- Remember to respect the limit defined for lexemes (VID_LEN) and 
+ *	- Remember to respect the limit defined for lexemes (VID_LEN) and
  *	  set the lexeme to the corresponding attribute (vidLexeme).
  *    Remember to end each token with the \0.
  *  - Suggestion: Use "strncpy" function.
@@ -588,7 +588,7 @@ Token funcLVID(pheonix_char lexeme[]) {
  *		Function responsible to identify IL (integer literals).
  * - It is necessary respect the limit (ex: 2-byte integer in C).
  * - In the case of larger lexemes, error shoul be returned.
- * - Only first ERR_LEN characters are accepted and eventually, 
+ * - Only first ERR_LEN characters are accepted and eventually,
  *   additional three dots (...) should be put in the output.
  *
  * Parameters: lexeme[] - The lexeme retrieved from TT
@@ -621,7 +621,7 @@ Token funcIL(pheonix_char lexeme[]) {
  *		Function responsible to identify CL (integer literals).
  * - It is necessary respect the limit (ex: 2-byte integer in C).
  * - In the case of larger lexemes, error shoul be returned.
- * - Only first ERR_LEN characters are accepted and eventually, 
+ * - Only first ERR_LEN characters are accepted and eventually,
  *   additional three dots (...) should be put in the output.
  *
  * Parameters: lexeme[] - The lexeme retrieved from TT
@@ -647,7 +647,7 @@ Token funcCL(pheonix_char lexeme[]) {
  *		Function responsible to identify BL (integer literals).
  * - It is necessary respect the limit (ex: 2-byte integer in C).
  * - In the case of larger lexemes, error shoul be returned.
- * - Only first ERR_LEN characters are accepted and eventually, 
+ * - Only first ERR_LEN characters are accepted and eventually,
  *   additional three dots (...) should be put in the output.
  *
  * Parameters: lexeme[] - The lexeme retrieved from TT
@@ -668,7 +668,7 @@ Token funcBL(pheonix_char lexeme[]) {
 	}
 
 	for(i = 2; i < lexLength; i++)
-		(*(newlexeme + (i-2))) = lexeme[i]; 
+		(*(newlexeme + (i-2))) = lexeme[i];
 
 	newLexLen = strlen(newlexeme);
 	/* Place bits in tbyte */
@@ -690,7 +690,7 @@ Token funcBL(pheonix_char lexeme[]) {
  *		Function responsible to identify FPL (float point literals).
  * - It is necessary respect the limit (ex: 4-byte integer in C).
  * - In the case of larger lexemes, error should be returned.
- * - Only first ERR_LEN characters are accepted and eventually, 
+ * - Only first ERR_LEN characters are accepted and eventually,
  *   additional three dots (...) should be put in the output.
  *
  * Parameters: lexeme[] - The lexeme retrieved from TT
@@ -717,8 +717,8 @@ Token funcFL(pheonix_char lexeme[]) {
 /*************************************************************
  * Acceptance State Function SL
  *		Function responsible to identify SL (string literals).
- * - The lexeme must be stored in the String Literal Table 
- *   (stringLiteralTable). You need to include the literals in 
+ * - The lexeme must be stored in the String Literal Table
+ *   (stringLiteralTable). You need to include the literals in
  *   this structure, using offsets. Remember to include \0 to
  *   separate the lexemes. Remember also to incremente the line.
  *

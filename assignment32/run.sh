@@ -6,11 +6,12 @@
 
 clear
 
-COMPILER=Compilers.exe
+COMPILER=compiler
 
-FILE1=A32A_Empty
-FILE2=A32B_Hello
-FILE3=A32C_Expression
+TEST_DIR="test"
+FILE1=empty
+FILE2=hello_world
+FILE3=expression
 
 # ---------------------------------------------------------------------
 # - Begin of Tests (A32 - F21) ----------------------------------------
@@ -21,21 +22,19 @@ FILE3=A32C_Expression
 #
 # - Basic Tests (A32 - F21) - - - - - - - - - - - - - - - - - - - - - -
 
-$COMPILER 3 $FILE1.phx > $FILE1.out	2> $FILE1.err
-$COMPILER 3 $FILE2.phx > $FILE2.out	2> $FILE2.err
-$COMPILER 3 $FILE3.phx > $FILE3.out	2> $FILE3.err
+$COMPILER 3 ${TEST_DIR}/${FILE1}.phx > $FILE1.out 2> ${TEST_DIR}/${FILE1}.err
+$COMPILER 3 ${TEST_DIR}/${FILE2}.phx > $FILE2.out 2> ${TEST_DIR}/${FILE2}.err
+$COMPILER 3 ${TEST_DIR}/${FILE3}.phx > $FILE3.out 2> ${TEST_DIR}/${FILE3}.err
 
 echo "Showing A32 Results..."
 
 echo =========================
-cat $FILE1.out
+cat ${TEST_DIR}/${FILE1}.out
 echo .........................
-cat $FILE2.out
+cat ${TEST_DIR}/${FILE2}.out
 echo .........................
-cat $FILE3.out
+cat ${TEST_DIR}/${FILE3}.out
 echo =========================
-ls *.out
-ls *.err
 
 # ---------------------------------------------------------------------
 # - End of Tests (A32 - F21) ------------------------------------------

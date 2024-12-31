@@ -20,7 +20,7 @@
  * The define directive does not have any effect on other compiler projects (gcc, Borland).
  */
 
-#define _CRT_SECURE_NO_WARNINGS 
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,11 +29,11 @@
 #include <ctype.h>
 
 #ifndef COMPILERS_H_
-#include "Compilers.h"
+#include "compilers.h"
 #endif
 
 #ifndef BUFFER_H_
-#include "Buffer.h"
+#include "buffer.h"
 #endif
 
  /* Check for ANSI C compliancy */
@@ -44,7 +44,7 @@
 #endif
 
 /*
- * ------------------------------------------------------------- 
+ * -------------------------------------------------------------
  *  Function declarations
  * -------------------------------------------------------------
  */

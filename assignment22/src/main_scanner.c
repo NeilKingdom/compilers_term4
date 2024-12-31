@@ -26,15 +26,15 @@
 #include <stdarg.h>
 
 #ifndef COMPILERS_H_
-#include "../deps/Compilers.h"
+#include "../deps/compilers.h"
 #endif
 
 #ifndef BUFFER_H_
-#include "../deps/Buffer.h"
+#include "../deps/buffer.h"
 #endif
 
 #ifndef SCANNER_H_
-#include "../deps/Scanner.h"
+#include "../deps/scanner.h"
 #endif
 
 /*check for ANSI C compliancy */
@@ -71,7 +71,7 @@ long getScannerFilesize(char* fname);
 void printToken(Token t);
 
 /*************************************************************
- *  Scanner Main function 
+ *  Scanner Main function
  * Parameters:
  *   argc / argv = Parameters from command prompt
  * Return value:
@@ -173,7 +173,7 @@ int mainScanner(int argc, char** argv) {
 	destroy(sourceBuffer);
 	destroy(stringLiteralTable);
 	sourceBuffer = stringLiteralTable = NULL;
-	
+
 	/* Ass2 evaluation only */
 	if (argv[3] != NULL && *argv[3] == 'l')
 		printf("The number of lines is: %d\n", line);

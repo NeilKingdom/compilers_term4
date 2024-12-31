@@ -1,0 +1,7 @@
+function int main {
+
+	# Hello World Program in Pheonix;
+	print "Hello World!";
+
+	return 0;
+}

@@ -2,9 +2,9 @@
 CC=gcc
 CFLAGS=-g -ansi -pedantic -Wall -Wextra -Wextra
 LDFLAGS=-lm
-BIN=Ash
+BIN=ash
 
-OBJ=Compilers.o MainBuffer.o Buffer.o MainScanner.o Scanner.o MainParser.o Parser.o
+OBJ=compilers.o main_buffer.o buffer.o main_scanner.o scanner.o main_parser.o parser.o
 
 # Default build
 all: $(BIN)

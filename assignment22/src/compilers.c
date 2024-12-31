@@ -19,7 +19,7 @@
 #include <stdlib.h>
 
 #ifndef COMPILERS_H_
-#include "../deps/Compilers.h"
+#include "../deps/compilers.h"
 #endif
 
 /************************************************************

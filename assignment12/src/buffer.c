@@ -17,11 +17,11 @@
 *************************************************************/
 
 #ifndef COMPILERS_H_
-#include "Compilers.h"
+#include "compilers.h"
 #endif
 
 #ifndef BUFFER_H_
-#include "Buffer.h"
+#include "buffer.h"
 #endif
 
 /************************************************************
@@ -106,14 +106,14 @@ BufferPointer addChar(BufferPointer pBuffer, pheonix_char ch) {
 			if(getSize(pBuffer) == BUFFER_ERROR)
 				return NULL;
 			newSize = pBuffer->size + pBuffer->increment;
-			if(newSize < 0 || newSize <= pBuffer->size) 
+			if(newSize < 0 || newSize <= pBuffer->size)
 				return NULL;
 			break;
 		case MODE_MULTI:
 			if(getSize(pBuffer) == BUFFER_ERROR)
 				return NULL;
 			newSize = pBuffer->size * pBuffer->increment;
-			if(newSize < 0 || newSize <= pBuffer->size) 
+			if(newSize < 0 || newSize <= pBuffer->size)
 				return NULL;
 			break;
 		default:
@@ -149,7 +149,7 @@ BufferPointer addChar(BufferPointer pBuffer, pheonix_char ch) {
 **************************************************************/
 pheonix_bool clear(BufferPointer pBuffer) {
 	pBuffer->position.writePos = pBuffer->position.markPos = pBuffer->position.readPos = 0;
-	
+
 	if(pBuffer == NULL)
 		return PHEONIX_FALSE;
 
@@ -188,13 +188,13 @@ pheonix_bool destroy(BufferPointer pBuffer) {
 *	Boolean value about operation success
 **************************************************************/
 pheonix_bool isFull(BufferPointer pBuffer) {
-	if(pBuffer == NULL) 
+	if(pBuffer == NULL)
 		return PHEONIX_TRUE;
 
-	if((pBuffer->flags & PHEONIX_FUL) == PHEONIX_FUL) 
+	if((pBuffer->flags & PHEONIX_FUL) == PHEONIX_FUL)
 		return PHEONIX_TRUE;
 
-	if (pBuffer->position.writePos * (pheonix_int)sizeof(pheonix_char) >= pBuffer->size) 
+	if (pBuffer->position.writePos * (pheonix_int)sizeof(pheonix_char) >= pBuffer->size)
 		return PHEONIX_TRUE;
 
 	return PHEONIX_FALSE;
@@ -238,7 +238,7 @@ pheonix_int getSize(BufferPointer pBuffer) {
 
 	if(pBuffer->size < 0 || pBuffer->size > PHEONIX_MAX)
 		return BUFFER_ERROR;
-	
+
 	return pBuffer->size;
 }
 
@@ -259,7 +259,7 @@ pheonix_int getMode(BufferPointer pBuffer) {
 
 	if(pBuffer->mode != MODE_FIXED && pBuffer->mode != MODE_ADDIT && pBuffer->mode != MODE_MULTI)
 		return BUFFER_ERROR;
-	
+
 	return pBuffer->mode;
 }
 
@@ -278,7 +278,7 @@ pheonix_int getMarkPos(BufferPointer pBuffer) {
 
 	if(pBuffer->position.markPos < 0 || pBuffer->position.markPos > pBuffer->size)
 		return BUFFER_ERROR;
-	
+
 	return pBuffer->position.markPos;
 }
 
@@ -298,7 +298,7 @@ pheonix_bool setMark(BufferPointer pBuffer, pheonix_int mark) {
 
 	if(mark < 0 || mark > pBuffer->size)
 		return PHEONIX_FALSE;
-	
+
 	pBuffer->position.markPos = mark;
 	return PHEONIX_TRUE;
 }
@@ -316,7 +316,7 @@ pheonix_int print(BufferPointer pBuffer) {
 	pheonix_char c;
 
 	if(pBuffer == NULL)
-		return BUFFER_ERROR;	
+		return BUFFER_ERROR;
 
 	c = getChar(pBuffer);
 	while (!(pBuffer->position.readPos == pBuffer->position.writePos)) {
@@ -370,13 +370,13 @@ pheonix_int load(BufferPointer pBuffer, FILE* fi) {
 *	Boolean value about operation success
 **************************************************************/
 pheonix_bool isEmpty(BufferPointer pBuffer) {
-	if(pBuffer == NULL)	
+	if(pBuffer == NULL)
 		return PHEONIX_TRUE;
 
 	if((pBuffer->flags & PHEONIX_EMP) == PHEONIX_EMP)
 		return PHEONIX_TRUE;
 
-	if (pBuffer->position.writePos == 0) 
+	if (pBuffer->position.writePos == 0)
 		return PHEONIX_TRUE;
 
 	return PHEONIX_FALSE;
